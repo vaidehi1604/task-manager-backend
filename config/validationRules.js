@@ -1,0 +1,37 @@
+const VALIDATION_RULES = {
+  TASK: {
+    ID: 'required|integer',
+    EMAIL: `required|string|email`,
+    PROFILE_NAME: [
+      'required',
+      'string',
+      'max:25',
+      `regex:${REGEX.PROFILE_NAME}`,
+    ],
+    NAME: `required|string|max:25`,
+    PHONE: 'required|string',
+    PASSWORD: [
+      'required',
+      'string',
+      'min:8',
+      'max:25',
+      `regex:${REGEX.PASSWORD}`,
+    ],
+    USER_TYPE: `required|string|in:${USER_TYPE.CONTENT},${USER_TYPE.REGULAR}`,
+    GENDER: 'string',
+    BIRTHDATE: 'required|string',
+    LANGUAGE: `required|array`,
+    LANGUAGE_ITEMS: 'required|integer',
+    CATEGORY: `array`,
+    CATEGORY_ITEMS: 'required|integer',
+    PROFILE_PIC_URL: 'string',
+    LOGIN_PASSWORD: 'required|string',
+    TAG_LINE: 'string',
+    BIO: 'string',
+    PRIVATE_ACCOUNT: 'boolean',
+    MESSAGE_REQUEST: `string|in:${Object.values(MESSAGE_REQUEST).join()}`,
+    STORY_REPLIES: `string|in:${Object.values(STORY_REPLIES).join()}`,
+    IS_NOTIFICATION_SETTING: `boolean`,
+    SEARCH: 'required|string',
+  }
+}
