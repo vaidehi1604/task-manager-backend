@@ -8,39 +8,34 @@ import createDefaultUsers from "./helper/createDefaultAdmin.js";
 
 dotenv.config();
 connectDB();
+
+// create default admin and user
 createDefaultUsers().catch(console.error);
 
 const app = express();
 
-// 🌍 Allowed origins (Frontend URLs)
 const allowedOrigins = [
-  "https://task-manager-flame-one.vercel.app", // YOUR VERCEL FRONTEND
-  "http://localhost:5173",                     // LOCAL DEV
+  "https://task-manager-flame-one.vercel.app",
+  "http://localhost:5173",
 ];
 
-// 🛑 CORS Middleware
 app.use(
   cors({
-    origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        console.log("❌ Blocked by CORS:", origin);
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    credentials: true,
+    origin: allowedOrigins,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+    credentials: true,
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
 app.use(express.json());
 
-// 🧩 API Routes
+app.get("/", (req, res) => {
+  res.json({ status: "Backend is running 🎉" });
+});
+
 app.use("/api/auth", authRoutes);
 app.use("/task", taskRoutes);
 
-// 🚀 Start Server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
