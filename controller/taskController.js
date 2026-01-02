@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import Task from "../models/Task.js";
 import { TASK_STATUS, TASK_PRIORITY } from "../config/constants.js";
+import User from "../models/User.js";
 
 export const createTask = async (req, res) => {
   try {
@@ -186,6 +187,59 @@ export const getTaskById = async (req, res) => {
     return res.status(500).json({
       message: "Server error",
       error: error.message,
+    });
+  }
+};
+
+export const getAdminDashboardStats = async (req, res) => {
+  try {
+
+
+    // Collect statistics in parallel for speed
+    const [
+      totalTasks,
+      totalUsers,
+      tasksByStatus,
+      tasksByPriority,
+      tasksByCategory,
+      latestTasks
+    ] = await Promise.all([
+      Task.countDocuments(),
+      User.countDocuments(),
+      Task.aggregate([
+        { $group: { _id: "$status", count: { $sum: 1 } } }
+      ]),
+      Task.aggregate([
+        { $group: { _id: "$priority", count: { $sum: 1 } } }
+      ]),
+      Task.aggregate([
+        { $group: { _id: "$category", count: { $sum: 1 } } }
+      ]),
+      Task.find().sort({ createdAt: -1 }).limit(5)
+    ]);
+
+    return res.status(200).json({
+      success: true,
+      dashboard: {
+        totals: {
+          tasks: totalTasks,
+          users: totalUsers
+        },
+        breakdowns: {
+          byStatus: tasksByStatus,
+          byPriority: tasksByPriority,
+          byCategory: tasksByCategory
+        },
+        recentTasks: latestTasks
+      }
+    });
+
+  } catch (error) {
+    console.error("Dashboard Error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error.message
     });
   }
 };

@@ -5,7 +5,8 @@ import {
   updateTask,
   deleteTask,
   getTaskById,
-  getAdminTasks
+  getAdminTasks,
+  getAdminDashboardStats
 } from "../controller/taskController.js";
 import auth from "../middleware/authMiddleware.js";
 import adminAuth from "../middleware/adminAuthMiddleware.js";
@@ -17,4 +18,5 @@ router.get("/admin/list",adminAuth, getAdminTasks);
 router.put("/:taskId",auth, updateTask);
 router.delete("/:taskId",adminAuth, deleteTask);
 router.get("/:taskId", auth, getTaskById);
+router.get("/admin/dashboard", adminAuth, getAdminDashboardStats);
 export default router;
