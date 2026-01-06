@@ -33,22 +33,43 @@ export const createTask = async (req, res) => {
 export const getTasks = async (req, res) => {
   try {
     const userId = req.user._id;
-    const { status, category, priority, page = 1, limit = 10 } = req.query;
+
+    const {
+      status,
+      category,
+      priority,
+      search,       // 🔹 search query
+      page = 1,
+      limit = 10,
+    } = req.query;
 
     const filter = { userId };
+
+    // 🔹 Filters
     if (status) filter.status = status;
     if (category) filter.category = category;
     if (priority) filter.priority = priority;
 
-    const skip = (page - 1) * limit;
+    // 🔍 Search ONLY on title
+    if (search) {
+      filter.title = { $regex: search, $options: "i" };
+    }
+
+    const skip = (page - 1) * Number(limit);
 
     const [tasks, total] = await Promise.all([
-      Task.find(filter).sort({ createdAt: -1 }).skip(skip).limit(Number(limit)),
+      Task.find(filter)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(Number(limit)),
+
       Task.countDocuments(filter),
     ]);
 
     return res.status(200).json({
       total,
+      page: Number(page),
+      limit: Number(limit),
       tasks,
     });
   } catch (error) {
@@ -60,16 +81,31 @@ export const getTasks = async (req, res) => {
   }
 };
 
+
 export const getAdminTasks = async (req, res) => {
   try {
-    const { status, category, priority, page = 1, limit = 10 } = req.query;
+    const {
+      status,
+      category,
+      priority,
+      search,       // 🔹 NEW
+      page = 1,
+      limit = 10,
+    } = req.query;
 
     const filter = {};
+
+    // 🔹 Filters
     if (status) filter.status = status;
     if (category) filter.category = category;
     if (priority) filter.priority = priority;
 
-    const skip = (page - 1) * limit;
+    // 🔍 Search ONLY on title
+    if (search) {
+      filter.title = { $regex: search, $options: "i" };
+    }
+
+    const skip = (page - 1) * Number(limit);
 
     const [tasks, total] = await Promise.all([
       Task.find(filter)
@@ -77,11 +113,14 @@ export const getAdminTasks = async (req, res) => {
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(Number(limit)),
+
       Task.countDocuments(filter),
     ]);
 
     return res.status(200).json({
       total,
+      page: Number(page),
+      limit: Number(limit),
       tasks,
     });
   } catch (error) {
@@ -92,6 +131,7 @@ export const getAdminTasks = async (req, res) => {
     });
   }
 };
+
 
 
 export const updateTask = async (req, res) => {
